@@ -58,7 +58,14 @@ function App() {
   const activeAct = oracleNarrative[actIndex];
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsAwake(true), 3000);
+    // Safer body styles to avoid blackout
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.background = '#000001';
+    document.body.style.overflow = 'hidden';
+
+    // Wake up the universe
+    const timer = setTimeout(() => setIsAwake(true), 1500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -75,29 +82,22 @@ function App() {
           <motion.div
             key="awakening"
             className="oracle-preloader"
-            exit={{ opacity: 0, scale: 0.8, filter: 'blur(100px)' }}
-            transition={{ duration: 2 }}
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 1.5 } }}
           >
-            <div className="preloader-content">
+            <div className="preloader-content" style={{ zIndex: 10000 }}>
               <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+                animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
                 className="sacred-geometry-loader"
               />
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 1, 0] }}
-                transition={{ repeat: Infinity, duration: 3 }}
-                className="oracle-loading-text"
-              >
-                CONSULTING THE ANCIENT TRUTHS...
-              </motion.div>
+              <div className="oracle-loading-text">RECALLING THE EONS...</div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="canvas-nexus" style={{ visibility: isAwake ? 'visible' : 'hidden', width: '100%', height: '100%' }}>
+      <div className="canvas-nexus" style={{ visibility: isAwake ? 'visible' : 'hidden', width: '100%', height: '100vw' && '100vh' }}>
         <Experience chapter={actIndex + 1} />
 
         <div className="oracle-overlay">
@@ -105,10 +105,10 @@ function App() {
             {isAwake && response === null && (
               <motion.div
                 key={activeAct.id}
-                initial={{ opacity: 0, y: 100, filter: 'blur(20px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: -100, filter: 'blur(40px)' }}
-                transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
+                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, scale: 1.1, filter: 'blur(30px)' }}
+                transition={{ duration: 1 }}
                 className="oracle-act"
               >
                 <div className="act-header">
@@ -124,10 +124,12 @@ function App() {
                     <h2 className="sacred-question">{activeAct.question}</h2>
                     <div className="choice-group">
                       <button className="ritual-btn accept" onClick={() => setResponse('YES')}>Accept the Rose</button>
-                      <button className="ritual-btn decline" onMouseEnter={(e) => {
-                        const x = Math.random() * 300 - 150;
-                        const y = Math.random() * 300 - 150;
-                        e.target.style.transform = `translate(${x}px, ${y}px)`;
+                      <button className="ritual-btn decline" onClick={() => alert("The eons call you back...")} onMouseEnter={(e) => {
+                        if (window.innerWidth >= 768) {
+                          const x = Math.random() * 300 - 150;
+                          const y = Math.random() * 300 - 150;
+                          e.target.style.transform = `translate(${x}px, ${y}px)`;
+                        }
                       }}>Decline</button>
                     </div>
                   </div>
@@ -142,26 +144,23 @@ function App() {
             {response === 'YES' && (
               <motion.div
                 key="ascension"
-                initial={{ opacity: 0, scale: 0.5 }}
+                initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="ascension-state"
               >
                 <div className="ascension-aura"></div>
                 <motion.div
                   animate={{
-                    scale: [1, 1.3, 1],
-                    filter: ['drop-shadow(0 0 50px #ff4d6d)', 'drop-shadow(0 0 150px #ff4d6d)', 'drop-shadow(0 0 50px #ff4d6d)']
+                    scale: [1, 1.2, 1],
+                    filter: ['drop-shadow(0 0 40px #ff4d6d)', 'drop-shadow(0 0 120px #ff4d6d)', 'drop-shadow(0 0 40px #ff4d6d)']
                   }}
-                  transition={{ repeat: Infinity, duration: 0.8 }}
+                  transition={{ repeat: Infinity, duration: 1.2 }}
                   className="sentient-heart-icon"
                 >
                   ❤️
                 </motion.div>
                 <h2 className="divine-wish">Happy Rose Day, Mini</h2>
                 <div className="divine-subtitle">OUR LOVE IS THE SINGULARITY.</div>
-                <div className="eternal-icon">
-                  <InfinityIcon size={60} strokeWidth={1} />
-                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -169,7 +168,7 @@ function App() {
       </div>
 
       <div className="oracle-footer">
-        <Sparkles size={12} /> ETERNAL CONNECTION PROTOCOL ACTIVE <Sparkles size={12} />
+        ETERNAL CONNECTION ACTIVE
       </div>
     </main>
   );
