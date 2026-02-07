@@ -1,0 +1,17 @@
+/* Micro-refinements for the 100 Trillion x experience */
+.cinetic-title {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.final-question {
+  text-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+.success-nexus {
+  z-index: 500;
+}
+
+.loader-ring {
+  filter: blur(5px);
+  box-shadow: 0 0 30px var(--gold);
+}
