@@ -2,7 +2,7 @@ import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const NebulaShader = ({ chapter }) => {
+const NebulaShader = ({ chapter, isMobile }) => {
   const mesh = useRef();
 
   const uniforms = useMemo(() => ({
@@ -32,6 +32,7 @@ const NebulaShader = ({ chapter }) => {
     }
   `;
 
+  // Simplified shader to prevent mobile timeout
   const fragmentShader = `
     varying vec2 vUv;
     uniform float uTime;
@@ -40,49 +41,16 @@ const NebulaShader = ({ chapter }) => {
     uniform vec3 uColorMid;
     uniform vec3 uColorEdge;
 
-    float hash(vec2 p) {
-      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
-    }
-
-    float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      f = f * f * (3.0 - 2.0 * f);
-      return mix(mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), f.x),
-                 mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
-    }
-
-    float fbm(vec2 p) {
-      float v = 0.0;
-      float a = 0.5;
-      for (int i = 0; i < 6; i++) {
-        v += a * noise(p);
-        p *= 2.0;
-        a *= 0.5;
-      }
-      return v;
-    }
-
     void main() {
       vec2 p = vUv * 2.0 - 1.0;
-      float eonSpeed = uTime * (0.01 + uChapter * 0.01);
+      float d = length(p);
       
-      // Multi-layered gas simulation
-      vec2 q = vec2(fbm(p + eonSpeed), fbm(p - eonSpeed * 0.5));
-      float r = fbm(p + q + eonSpeed * 0.2);
+      vec3 color = mix(uColorCenter, uColorMid, d * 0.8);
+      color = mix(color, uColorEdge, smoothstep(0.0, 1.5, d + sin(uTime * 0.1) * 0.2));
       
-      // Evolving color palette based on chapter
-      vec3 col1 = mix(uColorCenter, vec3(0.05, 0.0, 0.1), uChapter / 7.0);
-      vec3 col2 = mix(uColorMid, vec3(0.3, 0.05, 0.4), uChapter / 7.0);
-      vec3 col3 = mix(uColorEdge, vec3(0.8, 0.2, 0.3), uChapter / 7.0);
-      
-      vec3 color = mix(col1, col2, r);
-      color = mix(color, col3, q.y * 0.7);
-      
-      // Ancient starfield
-      float stars = pow(hash(vUv * 1200.0), 60.0) * (3.0 + uChapter * 0.5);
-      float shimmer = sin(uTime * 1.5 + hash(vUv) * 20.0) * 0.5 + 0.5;
-      color += stars * shimmer;
+      // Basic static stars for performance
+      float stars = fract(sin(dot(vUv, vec2(12.9898, 78.233))) * 43758.5453);
+      if (stars > 0.998) color += 0.5 * (1.0 + sin(uTime + stars));
 
       gl_FragColor = vec4(color, 1.0);
     }
